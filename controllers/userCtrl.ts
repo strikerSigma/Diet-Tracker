@@ -11,11 +11,12 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
     const body = req.body;
     const hash = await hashPassword(body.password)
         try{
-            const user = await prisma.user.create({
+            
+            const user:any = await prisma.user.create({
              data: {
                 name: body.name,
                 email: body.email,
-                password: hash
+                password: hash,
         },
             });
              await prisma.favoriteFood.create({
@@ -23,11 +24,27 @@ const createUser = asyncHandler(async (req: Request, res: Response) => {
                     user: { connect: { id: user.id } },
                     }
                 });
+                await prisma.foodCatalog.create({
+                    data:{
+                        user: { connect: { id: user.id } },
+                        catalogDate: new Date()
+                    }
+                });
+                const refreshToken = refreshJWT(user.id);   
+                await prisma.user.update({
+                where:{
+                    email: user.email
+                },
+                data: {
+                    refreshToken
+                }});
                 res.json({
                     id: user.id,
                     name: user.name,
-                    email: user.email
+                    email: user.email,
+                    refreshToken
                 });
+                
         }
         catch (err) { throw new Error("User already exists");}
 });
@@ -39,7 +56,8 @@ const loginUserCtrl = asyncHandler(async (req: Request, res: Response) => {
              where: {
                 email},
             });
-            const refreshToken = await refreshJWT(user?._id);           
+            console.log(user);
+            const refreshToken = refreshJWT(user.id);           
             const unhased:any = await validateUser(user.password,password);
             console.log(unhased);
             if(unhased){
@@ -62,7 +80,7 @@ const loginUserCtrl = asyncHandler(async (req: Request, res: Response) => {
             else {throw new Error("Password incorrect");}
                 
         }
-        catch (err) { throw new Error("Error occured when logging in");}
+        catch (err) { throw new Error("Error occured when logging in"+err);}
 });
 //implement Email later for better user verification
 const deleteUser = asyncHandler(async (req: any, res: Response) => {

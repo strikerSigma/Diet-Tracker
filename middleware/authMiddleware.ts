@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import { prisma } from "../Models/Users";
 import jwt from 'jsonwebtoken';
 import asyncHandler from 'express-async-handler';
-import { User } from "../Models/Users";  // Make sure to import your User model
 
 export const authMiddleware = asyncHandler(async (req: any, res: Response, next: NextFunction) => {
   let token;
@@ -20,10 +19,12 @@ export const authMiddleware = asyncHandler(async (req: any, res: Response, next:
         req.user = user;
         next();
       }
-    } catch (e) {
-      throw new Error("Not authorized, token expired, please login again");
+    } catch (e:any) {
+       res.status(401)
+      throw new Error("Not authorized, token expired, please login again"+e);
     }
   } else {
+    res.status(401)
     throw new Error("No token attached to request");
   }
 });
