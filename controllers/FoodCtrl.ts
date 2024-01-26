@@ -109,4 +109,5 @@ export {
     CreateFood,
     favoriteFood,
     RemovefavoriteFood,
+    DeleteFood
 }

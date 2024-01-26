@@ -20,10 +20,11 @@ model User {
   JWTsecret          String?
   createdAt          DateTime      @default(now())
   isProMember        Boolean       @default(false)
-  foodCatalogs       FoodCatalog[]
+  foodCatalogs       FoodCatalog[] @relation("FoodCatalog")
   favoriteFood       FavoriteFood?
   targets            Target[]
   customMeals        CustomMeal[]
+  FoodCatalog        FoodCatalog[]
 }
 
 model FoodCatalog {
@@ -33,6 +34,7 @@ model FoodCatalog {
   catalogDate DateTime
   createdAt   DateTime @default(now())
   foods       Food[]
+  User        User     @relation(fields: [userId], references: [id])
 }
 
 model Food {
